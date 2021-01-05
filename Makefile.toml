@@ -1,0 +1,31 @@
+[config]
+skip_core_tasks = true
+
+[tasks.default]
+category = "Command"
+script = '''
+cargo run > docs/index.html
+'''
+dependencies = ["src-actor-rs", "src-outbox-rs", "public"]
+
+[tasks.public]
+script = '''
+mkdir docs
+'''
+condition = { files_not_exist = ["docs"] }
+
+[tasks.src-outbox-rs]
+script = '''
+quicktype --derive-debug archive/outbox.json -o src/outbox.rs --visibility crate
+'''
+condition_script = ['''
+[ ! src/outbox.rs -nt archive/outbox.json ]
+''']
+
+[tasks.src-actor-rs]
+script = '''
+quicktype --derive-debug archive/actor.json -o src/actor.rs --visibility crate
+'''
+condition_script = ['''
+[ ! src/actor.rs -nt archive/actor.json ]
+''']
